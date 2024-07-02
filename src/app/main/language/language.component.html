@@ -1,10 +1,29 @@
-<h2>{{language()}}</h2>
-<h3>Top start words</h3>
-@for(topTenWord of topTenStartWords(); track topTenWord) {
-    <p>{{topTenWord.word}} - score: {{topTenWord.score}}</p>
+
+@if (wordLength() === 5) {
+<h2>Solution help for {{language()}}</h2>
+<h3>Top guesses</h3>
+@for(topWord of topGuesses(); track topWord) {
+    <p>{{topWord}}</p>
+} @empty {
+    <p>None or too many</p>
 }
 
-<h3>Frequencies in words of length {{wordLength()}}</h3>
+<h3>Top discovery words</h3>
+<p>Currently not supported.</p>
+}
+
+<h2>General info for {{language()}}</h2>
+<h3>Top start words</h3>
+@for(topWord of topStartWords(); track topWord) {
+    <p>{{topWord.word}} - score: {{topWord.score}}</p>
+}
+
+<h3>Top second discovery words (if no hits on start word)</h3>
+@for(topWord of topSecondDiscoveryWords(); track topWord) {
+    <p>{{topWord.word}} - score: {{topWord.score}}</p>
+}
+
+<h3>Occurrences in {{relevantWords().length}} words of length {{wordLength()}}</h3>
 @for(frequency of characterFrequenciesList(); track frequency) {
     <p>{{frequency[0]}}: {{frequency[1]}}</p>
 }

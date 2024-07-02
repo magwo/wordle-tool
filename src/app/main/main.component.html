@@ -1,18 +1,41 @@
 <h2>Word length</h2>
-<input type="number" [(ngModel)]="wordLength" />
+<div>
+    <input type="number" [(ngModel)]="wordLength" />
+</div>
 
-<!-- <h2>Known characters</h2>
-<input type="text" />
-<input type="text" />
-<input type="text" />
-<input type="text" />
-<input type="text" /> -->
+<!-- TODO: Support other lengths than 5 - using some FormArray probably -->
+@if(wordLength() === 5) {
+    <div>
+        <h3>Known correct characters</h3>
+        <input type="text" class="single-character" maxlength="1" [(ngModel)]="correctCharacter1" placeholder="?" />
+        <input type="text" class="single-character" maxlength="1" [(ngModel)]="correctCharacter2" placeholder="?" />
+        <input type="text" class="single-character" maxlength="1" [(ngModel)]="correctCharacter3" placeholder="?" />
+        <input type="text" class="single-character" maxlength="1" [(ngModel)]="correctCharacter4" placeholder="?" />
+        <input type="text" class="single-character" maxlength="1" [(ngModel)]="correctCharacter5" placeholder="?" />
+    </div>
+    
+    <div>
+        <h3>Known present characters but not at this position</h3>
+        <input type="text" [(ngModel)]="presentButWrongAtPosition1" placeholder="?" />
+        <input type="text" [(ngModel)]="presentButWrongAtPosition2" placeholder="?" />
+        <input type="text" [(ngModel)]="presentButWrongAtPosition3" placeholder="?" />
+        <input type="text" [(ngModel)]="presentButWrongAtPosition4" placeholder="?" />
+        <input type="text" [(ngModel)]="presentButWrongAtPosition5" placeholder="?" />
+    </div>
+
+    <div>
+        <h3>Known not present</h3>
+        <input type="text" class="long-field" [(ngModel)]="knownNotPresentInput" />
+    </div>
+} @else {
+    <p>Solution help currently not supported for words of length other than 5.</p>
+}
 
 <div class="languages-container">
     <div class="language-container">
-        <app-language [language]="'english'" [wordLength]="wordLength()"></app-language>
+        <app-language [language]="'english'" [wordLength]="wordLength()" [correctCharacters]="correctCharacters()" [presentButWrongAtPosition]="presentButWrongAtPosition()" [knownNotPresent]="knownNotPresent()"></app-language>
     </div>
     <div class="language-container">
-        <app-language [language]="'swedish'" [wordLength]="wordLength()"></app-language>
+        <app-language [language]="'swedish'" [wordLength]="wordLength()" [correctCharacters]="correctCharacters()" [presentButWrongAtPosition]="presentButWrongAtPosition()" [knownNotPresent]="knownNotPresent()"></app-language>
     </div>
 </div>
