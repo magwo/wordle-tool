@@ -7,6 +7,9 @@ type UpperCaseString = string;
 type SingleCharacter = string;
 export type Language = 'swedish' | 'english';
 type WordWithScore = {word: UpperCaseString, score: number};
+interface WordWithScoreAndGuessInfo extends WordWithScore {
+  isValidGuess: boolean;
+};
 
 
 function getWordsWithScores(words: UpperCaseString[], characterFrequencies: {[key: SingleCharacter]: number}, forbiddenCharacters: UpperCaseString): WordWithScore[] {
@@ -91,6 +94,7 @@ export class LanguageComponent {
   });
 
   topGuesses = computed<string[]>(() => {
+    // TODO: Add discovery scores to guesses
     const correctCharacters = this.correctCharacters();
     const knownNotPresent = this.knownNotPresent();
     const presentButWrongAtPosition = this.presentButWrongAtPosition();
@@ -122,11 +126,55 @@ export class LanguageComponent {
       return true;
     });
 
-    if (guesses.length > 40) {
-      return [];
-    } else {
-      return guesses.slice(0, 10);
-    }
+    return guesses;
+  });
+
+  topTenGuesses = computed<string[]>(() => {
+    return this.topGuesses().slice(0, 10);
+  });
+
+  topDiscoveryWords = computed<WordWithScoreAndGuessInfo[]>(() => {
+    const correctCharacters = this.correctCharacters();
+    const characterFrequencies = this.characterFrequencies();
+    const knownNotPresent = this.knownNotPresent();
+    const presentButWrongAtPosition = this.presentButWrongAtPosition();
+    const relevantWords = this.relevantWords();
+    const allKnownPresentCharacters = presentButWrongAtPosition.join('');
+    const guesses = this.topGuesses();
+
+    const uninterestingCharacters = [correctCharacters, knownNotPresent, allKnownPresentCharacters].join('');
+
+    const discoveries = relevantWords.map((word) => {
+      let score = 0;
+      let isValidGuess = false;
+      const seen: {[key: string]: boolean} = {};
+      for (let i=0; i<word.length; i++) {
+        const char = word[i];
+        if (uninterestingCharacters.includes(char)) {
+          continue;
+        } else if(seen[char] !== true) {
+          score += characterFrequencies[char];
+          seen[char] = true;
+        }
+      }
+      if (guesses.length < 1000 && guesses.includes(word)) {
+        // Possible guess - increase discovery score
+        if (guesses.length < 300) {
+          score *= 1.3;
+        } else if (guesses.length < 20) {
+          score *= 4;
+        } else if (guesses.length < 6) {
+          score *= 10;
+        }
+        isValidGuess = true;
+      }
+      return {word, score: Math.round(score), isValidGuess};
+    });
+    return discoveries.sort((wws1, wws2) => wws2.score - wws1.score);
+  });
+
+  topTenDiscoveryWords = computed<WordWithScoreAndGuessInfo[]>(() => {
+    return this.topDiscoveryWords().slice(0, 10);
   });
 
   constructor(private httpClient: HttpClient) {
