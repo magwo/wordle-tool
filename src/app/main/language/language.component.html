@@ -1,0 +1,10 @@
+<h2>{{language()}}</h2>
+<h3>Top start words</h3>
+@for(topTenWord of topTenStartWords(); track topTenWord) {
+    <p>{{topTenWord.word}} - score: {{topTenWord.score}}</p>
+}
+
+<h3>Frequencies in words of length {{wordLength()}}</h3>
+@for(frequency of characterFrequenciesList(); track frequency) {
+    <p>{{frequency[0]}}: {{frequency[1]}}</p>
+}

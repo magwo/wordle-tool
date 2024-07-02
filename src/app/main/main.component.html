@@ -1,0 +1,18 @@
+<h2>Word length</h2>
+<input type="number" [(ngModel)]="wordLength" />
+
+<!-- <h2>Known characters</h2>
+<input type="text" />
+<input type="text" />
+<input type="text" />
+<input type="text" />
+<input type="text" /> -->
+
+<div class="languages-container">
+    <div class="language-container">
+        <app-language [language]="'english'" [wordLength]="wordLength()"></app-language>
+    </div>
+    <div class="language-container">
+        <app-language [language]="'swedish'" [wordLength]="wordLength()"></app-language>
+    </div>
+</div>

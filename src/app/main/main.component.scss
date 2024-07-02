@@ -1,0 +1,12 @@
+
+:host {
+    .languages-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        
+        .language-container {
+            padding: 8px;
+        }   
+    }
+}
