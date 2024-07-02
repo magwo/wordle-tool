@@ -1,19 +1,22 @@
-@if (wordLength() === 5) {
+@if(rawWordBuffer() === undefined) {
+<p class="bold loading">Loading word list...</p>
+} @else { @if (wordLength() === 5) {
 <h2>Solution help for {{ language() }}</h2>
 <h3>Top guesses ({{ topGuesses().length }})</h3>
 @if (topGuesses().length < 1000) { @for(topWord of topTenGuesses(); track
 topWord) {
 <p>{{ topWord }}</p>
 } @if (topGuesses().length > topTenGuesses().length) {
-    <p>...</p>
-}
-} @else {
+<p>...</p>
+} } @else {
 <p>Too many possible guesses.</p>
 } }
 
 <h3>Top discovery words (bolded are valid guesses)</h3>
 @for(topWord of topTenDiscoveryWords(); track topWord) {
-<p [class.bold]="topWord.isValidGuess">{{ topWord.word }} - discovery score {{topWord.score}}</p>
+<p [class.bold]="topWord.isValidGuess">
+  {{ topWord.word }} - discovery score {{ topWord.score }}
+</p>
 } @empty {
 <p>None or too many</p>
 }
@@ -34,4 +37,4 @@ topWord) {
 </h3>
 @for(frequency of characterFrequenciesList(); track frequency) {
 <p>{{ frequency[0] }}: {{ frequency[1] }}</p>
-}
+} }
