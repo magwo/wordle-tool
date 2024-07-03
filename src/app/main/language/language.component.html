@@ -5,7 +5,7 @@
 <h3>Top guesses ({{ topGuesses().length }})</h3>
 @if (topGuesses().length < 1000) { @for(topWord of topTenGuesses(); track
 topWord) {
-<p>{{ topWord }}</p>
+<p>{{ topWord.word }} - discovery score: {{topWord.score}}</p>
 } @if (topGuesses().length > topTenGuesses().length) {
 <p>...</p>
 } } @else {
@@ -24,12 +24,12 @@ topWord) {
 <h2>General info for {{ language() }}</h2>
 <h3>Top start words</h3>
 @for(topWord of topStartWords(); track topWord) {
-<p>{{ topWord.word }} - score: {{ topWord.score }}</p>
+<p>{{ topWord.word }} - discovery score: {{ topWord.score }}</p>
 }
 
 <h3>Top second discovery words (if no hits on start word)</h3>
 @for(topWord of topSecondDiscoveryWords(); track topWord) {
-<p>{{ topWord.word }} - score: {{ topWord.score }}</p>
+<p>{{ topWord.word }} - discovery score: {{ topWord.score }}</p>
 }
 
 <h3>

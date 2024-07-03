@@ -11,23 +11,6 @@ interface WordWithScoreAndGuessInfo extends WordWithScore {
   isValidGuess: boolean;
 };
 
-
-function getWordsWithScores(words: UpperCaseString[], characterFrequencies: {[key: SingleCharacter]: number}, forbiddenCharacters: UpperCaseString): WordWithScore[] {
-  const wordsWithScores: {word: UpperCaseString, score: number}[] = words.map(w => {
-    let score = 0;
-    const seen: {[key: string]: boolean} = {};
-    for(const char of w) {
-      if (seen[char] !== true && !forbiddenCharacters.includes(char)) {
-        score += characterFrequencies[char];
-        seen[char] = true;
-      }
-    }
-    return {word: w, score};
-  });
-  
-  return wordsWithScores;
-}
-
 @Component({
   selector: 'app-language',
   standalone: true,
@@ -86,20 +69,20 @@ export class LanguageComponent {
     const characterFrequencies = this.characterFrequencies();
     const characterFrequenciesList = this.characterFrequenciesList();
 
-    const forbiddenCharacters = characterFrequenciesList.slice(0, 5).map(entry => entry[0]).join('');
-    console.log("Forbidden characters", forbiddenCharacters);
+    const uninterestingCharacters = characterFrequenciesList.slice(0, 5).map(entry => entry[0]).join('');
 
-    const wordsWithScores = getWordsWithScores(relevantWords, characterFrequencies, forbiddenCharacters);
+    const wordsWithScores = getWordsWithScores(relevantWords, characterFrequencies, uninterestingCharacters);
     return wordsWithScores.sort((wws1, wws2) => wws2.score - wws1.score).slice(0, 10);
   });
 
-  topGuesses = computed<string[]>(() => {
+  topGuesses = computed<WordWithScore[]>(() => {
     // TODO: Add discovery scores to guesses
     const correctCharacters = this.correctCharacters();
     const knownNotPresent = this.knownNotPresent();
     const presentButWrongAtPosition = this.presentButWrongAtPosition();
     const relevantWords = this.relevantWords();
     const allKnownPresentCharacters = presentButWrongAtPosition.join('');
+    const characterFrequencies = this.characterFrequencies();
 
     const guesses = relevantWords.filter((word) => {
       // Remove any word that doesn't have the known present characters
@@ -126,10 +109,12 @@ export class LanguageComponent {
       return true;
     });
 
-    return guesses;
+    const uninterestingCharacters = [correctCharacters, knownNotPresent, allKnownPresentCharacters].join('');
+    const guessesWithScores = getWordsWithScores(guesses, characterFrequencies, uninterestingCharacters);
+    return guessesWithScores.sort((wws1, wws2) => wws2.score - wws1.score);
   });
 
-  topTenGuesses = computed<string[]>(() => {
+  topTenGuesses = computed<WordWithScore[]>(() => {
     return this.topGuesses().slice(0, 10);
   });
 
@@ -145,19 +130,9 @@ export class LanguageComponent {
     const uninterestingCharacters = [correctCharacters, knownNotPresent, allKnownPresentCharacters].join('');
 
     const discoveries = relevantWords.map((word) => {
-      let score = 0;
+      let score = getWordDiscoveryScore(word, characterFrequencies, uninterestingCharacters);
       let isValidGuess = false;
-      const seen: {[key: string]: boolean} = {};
-      for (let i=0; i<word.length; i++) {
-        const char = word[i];
-        if (uninterestingCharacters.includes(char)) {
-          continue;
-        } else if(seen[char] !== true) {
-          score += characterFrequencies[char];
-          seen[char] = true;
-        }
-      }
-      if (guesses.length < 1000 && guesses.includes(word)) {
+      if (guesses.length < 1000 && guesses.find(otherWord => otherWord.word === word)) {
         // Possible guess - increase discovery score
         if (guesses.length < 300) {
           score *= 1.3;
@@ -187,4 +162,29 @@ export class LanguageComponent {
       this.rawWordBuffer.set(resp);
     });
   }
+}
+
+function getWordDiscoveryScore(word: UpperCaseString, characterFrequencies: {[key: SingleCharacter]: number}, uninterestingCharacters: string) {
+  let score = 0;
+  const seen: {[key: string]: boolean} = {};
+  for (let i=0; i<word.length; i++) {
+    const char = word[i];
+    if (uninterestingCharacters.includes(char)) {
+      continue;
+    } else if(seen[char] !== true) {
+      score += characterFrequencies[char];
+      seen[char] = true;
+    }
+  }
+  return score;
+}
+
+
+function getWordsWithScores(words: UpperCaseString[], characterFrequencies: {[key: SingleCharacter]: number}, uninterestingCharacters: UpperCaseString): WordWithScore[] {
+  const wordsWithScores: {word: UpperCaseString, score: number}[] = words.map(word => {
+    const score = getWordDiscoveryScore(word, characterFrequencies, uninterestingCharacters);
+    return {word, score};
+  });
+  
+  return wordsWithScores;
 }
